@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+
+# Environment & secrets
+.env
+.env.*
+*.env
+secrets.*
+*.pem
+*.key
+
+# Supabase local artifacts
+supabase/.temp/
+supabase/.branches/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
