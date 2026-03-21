@@ -756,6 +756,21 @@ function HomePage() {
       route: "/team-comparison",
       idx: "05",
     },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="8" cy="8" r="2" />
+          <circle cx="16" cy="8" r="2" />
+          <circle cx="8" cy="16" r="2" />
+          <circle cx="16" cy="16" r="2" />
+          <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+        </svg>
+      ),
+      title: "Average Touches",
+      desc: "Standardized player positioning heatmap with touch counts.",
+      route: "/average-touches",
+      idx: "06",
+    },
   ];
 
   return (
@@ -767,7 +782,7 @@ function HomePage() {
           of the Game.
         </h1>
         <p className="home-subtitle">
-          Tactical intelligence for the modern analyst. Five lenses into Premier
+          Tactical intelligence for the modern analyst. Six lenses into Premier
           League match data.
         </p>
       </div>
@@ -2879,6 +2894,7 @@ var NAV_ITEMS = [
   { path: "/xt", label: "Expected Threat" },
   { path: "/match-summary", label: "Match Summary" },
   { path: "/team-comparison", label: "Team Comparison" },
+  { path: "/average-touches", label: "Average Touches" },
 ];
 
 function SiteHeader({ route, onBack }) {
@@ -3099,6 +3115,11 @@ function LandingPage({ onStart }) {
       title: "Team Comparison",
       desc: "Radar charts and head-to-head metrics across entire seasons.",
     },
+    {
+      num: "06",
+      title: "Average Touches",
+      desc: "Standardized player positioning heatmap showing team shape and individual influence.",
+    },
   ];
 
   return (
@@ -3151,7 +3172,7 @@ function LandingPage({ onStart }) {
       <div className="preview-sections">
         <div className="preview-header">
           <span className="preview-overline">The Tools</span>
-          <h2 className="preview-headline">Five Lenses on the Game</h2>
+          <h2 className="preview-headline">Six Lenses on the Game</h2>
         </div>
         {previews.map(function (p, i) {
           return (
@@ -3194,6 +3215,264 @@ function LandingPage({ onStart }) {
 }
 
 /* ================================================================
+   AVERAGE TOUCHES — Player Positioning Heatmap
+   ================================================================ */
+function AverageTouchesPage() {
+  var s1 = useState([]),
+    matchIndex = s1[0],
+    setMatchIndex = s1[1];
+  var s2 = useState(""),
+    season = s2[0],
+    setSeason = s2[1];
+  var s3 = useState(""),
+    selectedTeam = s3[0],
+    setSelectedTeam = s3[1];
+  var s4 = useState(""),
+    matchId = s4[0],
+    setMatchId = s4[1];
+  var s5 = useState([]),
+    avgPositions = s5[0],
+    setAvgPositions = s5[1];
+  var s6 = useState(false),
+    loading = s6[0],
+    setLoading = s6[1];
+
+  useEffect(function () {
+    api("/match-index").then(function (idx) {
+      setMatchIndex(idx);
+    });
+  }, []);
+
+  // Derive all seasons
+  var allSeasons = useMemo(function () {
+    return matchIndex
+      .map(function (m) { return m.season; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; })
+      .sort();
+  }, [matchIndex]);
+
+  // Derive teams for selected season
+  var seasonTeams = useMemo(function () {
+    if (!season) return [];
+    var teamsSet = {};
+    matchIndex.forEach(function (m) {
+      if (m.season === season) {
+        if (m.home) teamsSet[m.home] = true;
+        if (m.away) teamsSet[m.away] = true;
+      }
+    });
+    return Object.keys(teamsSet).sort();
+  }, [matchIndex, season]);
+
+  // Filter matches by season AND team
+  var teamMatches = useMemo(function () {
+    if (!season || !selectedTeam) return [];
+    return matchIndex.filter(function (m) {
+      return m.season === season && (m.home === selectedTeam || m.away === selectedTeam);
+    });
+  }, [matchIndex, season, selectedTeam]);
+
+  // Set default season
+  useEffect(function () {
+    if (!matchIndex.length || season) return;
+    if (allSeasons.length) setSeason(allSeasons[allSeasons.length - 1]);
+  }, [matchIndex, allSeasons]);
+
+  // Set default team
+  useEffect(function () {
+    if (!seasonTeams.length) return;
+    setSelectedTeam(seasonTeams.indexOf("Liverpool") >= 0 ? "Liverpool" : seasonTeams[0]);
+  }, [season, seasonTeams]);
+
+  // Set default match
+  useEffect(function () {
+    if (!teamMatches.length) return;
+    setMatchId("" + teamMatches[0].id);
+  }, [selectedTeam, teamMatches]);
+
+  // Load average touches data
+  useEffect(function () {
+    if (!matchId) return;
+    setLoading(true);
+    api("/match/" + matchId + "/average-touches")
+      .then(function (data) {
+        setAvgPositions(data);
+        setLoading(false);
+      })
+      .catch(function () { setLoading(false); });
+  }, [matchId]);
+
+  // Format match display
+  var formatMatch = function (m) {
+    if (m.home === selectedTeam) {
+      return "vs " + m.away + " (H)";
+    } else {
+      return "vs " + m.home + " (A)";
+    }
+  };
+
+  // Get teams from data
+  var teams = useMemo(function () {
+    if (!avgPositions.length) return [];
+    var teamsSet = {};
+    avgPositions.forEach(function (p) {
+      if (p.team) teamsSet[p.team] = true;
+    });
+    return Object.keys(teamsSet).sort();
+  }, [avgPositions]);
+
+  var teamAData = avgPositions.filter(function (p) { return p.team === teams[0]; });
+  var teamBData = avgPositions.filter(function (p) { return p.team === teams[1]; });
+  var maxTouches = Math.max(1, Math.max.apply(null, avgPositions.map(function (p) { return p.touches_count || 0; })));
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>Average Touches</h2>
+        <p>Standardized player positioning with both teams attacking left to right.</p>
+      </div>
+      <div className="controls-row">
+        <div className="control-group">
+          <label>Season</label>
+          <select value={season} onChange={function (e) { setSeason(e.target.value); }}>
+            {allSeasons.map(function (s) {
+              return (
+                <option key={s} value={s}>
+                  {s} Premier League
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div className="control-group">
+          <label>Team</label>
+          <select value={selectedTeam} onChange={function (e) { setSelectedTeam(e.target.value); }}>
+            {seasonTeams.map(function (t) {
+              return (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div className="control-group">
+          <label>Match</label>
+          <select value={matchId} onChange={function (e) { setMatchId(e.target.value); }} style={{ minWidth: 200 }}>
+            {teamMatches.map(function (m) {
+              return (
+                <option key={m.id} value={"" + m.id}>
+                  {formatMatch(m)}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      </div>
+      {loading ? (
+        <Loading />
+      ) : avgPositions.length > 0 && teams.length === 2 ? (
+        <div>
+          <div className="avg-touch-legend">
+            <div className="legend-item">
+              <span className="legend-dot" style={{ background: "#C8102E" }}></span>
+              <span className="legend-label">{teams[0]} (Attacking →)</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot" style={{ background: "#B8860B" }}></span>
+              <span className="legend-label">← Attacking) {teams[1]}</span>
+            </div>
+            <div className="legend-note">Bubble size = touch count</div>
+          </div>
+          <PitchSVG>
+            {teamAData.map(function (p, i) {
+              var radius = Math.sqrt((p.touches_count / maxTouches) * 300) + 4;
+              var lastName = (p.player || "").split(" ").pop();
+              return (
+                <g key={i}>
+                  <circle
+                    cx={p.avg_x}
+                    cy={Y(p.avg_y)}
+                    r={radius}
+                    fill="#C8102E"
+                    fillOpacity="0.75"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x={p.avg_x}
+                    y={Y(p.avg_y) + radius + 4}
+                    fill="#1f1f1f"
+                    fontSize="3.5"
+                    fontWeight="600"
+                    textAnchor="middle"
+                    fontFamily="var(--font)"
+                  >
+                    {lastName}
+                  </text>
+                  <text
+                    x={p.avg_x}
+                    y={Y(p.avg_y) + 1}
+                    fill="#FFFFFF"
+                    fontSize="3"
+                    fontWeight="700"
+                    textAnchor="middle"
+                    fontFamily="var(--font-mono)"
+                  >
+                    {p.touches_count}
+                  </text>
+                </g>
+              );
+            })}
+            {teamBData.map(function (p, i) {
+              var radius = Math.sqrt((p.touches_count / maxTouches) * 300) + 4;
+              var lastName = (p.player || "").split(" ").pop();
+              return (
+                <g key={i + 100}>
+                  <circle
+                    cx={p.avg_x}
+                    cy={Y(p.avg_y)}
+                    r={radius}
+                    fill="#B8860B"
+                    fillOpacity="0.75"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x={p.avg_x}
+                    y={Y(p.avg_y) + radius + 4}
+                    fill="#1f1f1f"
+                    fontSize="3.5"
+                    fontWeight="600"
+                    textAnchor="middle"
+                    fontFamily="var(--font)"
+                  >
+                    {lastName}
+                  </text>
+                  <text
+                    x={p.avg_x}
+                    y={Y(p.avg_y) + 1}
+                    fill="#FFFFFF"
+                    fontSize="3"
+                    fontWeight="700"
+                    textAnchor="middle"
+                    fontFamily="var(--font-mono)"
+                  >
+                    {p.touches_count}
+                  </text>
+                </g>
+              );
+            })}
+          </PitchSVG>
+        </div>
+      ) : (
+        <EmptyState message="No touch data available for this match." />
+      )}
+    </div>
+  );
+}
+
+/* ================================================================
    DASHBOARD SHELL — Editorial Layout
    ================================================================ */
 function Dashboard({ onBack }) {
@@ -3215,6 +3494,9 @@ function Dashboard({ onBack }) {
       break;
     case "/team-comparison":
       Page = TeamComparisonPage;
+      break;
+    case "/average-touches":
+      Page = AverageTouchesPage;
       break;
     default:
       Page = HomePage;
