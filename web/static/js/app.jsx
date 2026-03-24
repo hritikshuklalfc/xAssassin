@@ -758,7 +758,12 @@ function HomePage() {
     },
     {
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
           <circle cx="8" cy="8" r="2" />
           <circle cx="16" cy="8" r="2" />
           <circle cx="8" cy="16" r="2" />
@@ -801,7 +806,7 @@ function HomePage() {
         </div>
         <div className="home-metric-divider" />
         <div className="home-metric">
-          <span className="home-metric-value">5</span>
+          <span className="home-metric-value">6</span>
           <span className="home-metric-label">Tools</span>
         </div>
       </div>
@@ -1192,76 +1197,118 @@ function SCAPage() {
   }, []);
 
   // Derive all seasons from matchIndex
-  var allSeasons = useMemo(function () {
-    return matchIndex
-      .map(function (m) { return m.season; })
-      .filter(function (v, i, a) { return a.indexOf(v) === i; })
-      .sort();
-  }, [matchIndex]);
+  var allSeasons = useMemo(
+    function () {
+      return matchIndex
+        .map(function (m) {
+          return m.season;
+        })
+        .filter(function (v, i, a) {
+          return a.indexOf(v) === i;
+        })
+        .sort();
+    },
+    [matchIndex],
+  );
 
   // Derive teams for selected season from matchIndex
-  var seasonTeams = useMemo(function () {
-    if (!season) return [];
-    var teamsSet = {};
-    matchIndex.forEach(function (m) {
-      if (m.season === season) {
-        if (m.home) teamsSet[m.home] = true;
-        if (m.away) teamsSet[m.away] = true;
-      }
-    });
-    return Object.keys(teamsSet).sort();
-  }, [matchIndex, season]);
+  var seasonTeams = useMemo(
+    function () {
+      if (!season) return [];
+      var teamsSet = {};
+      matchIndex.forEach(function (m) {
+        if (m.season === season) {
+          if (m.home) teamsSet[m.home] = true;
+          if (m.away) teamsSet[m.away] = true;
+        }
+      });
+      return Object.keys(teamsSet).sort();
+    },
+    [matchIndex, season],
+  );
 
   // Filter matches by season AND team (where team played home or away)
-  var teamMatches = useMemo(function () {
-    if (!season || !selectedTeam) return [];
-    return matchIndex.filter(function (m) {
-      return m.season === season && (m.home === selectedTeam || m.away === selectedTeam);
-    });
-  }, [matchIndex, season, selectedTeam]);
+  var teamMatches = useMemo(
+    function () {
+      if (!season || !selectedTeam) return [];
+      return matchIndex.filter(function (m) {
+        return (
+          m.season === season &&
+          (m.home === selectedTeam || m.away === selectedTeam)
+        );
+      });
+    },
+    [matchIndex, season, selectedTeam],
+  );
 
   // Set default season when matchIndex loads
-  useEffect(function () {
-    if (!matchIndex.length || season) return;
-    if (allSeasons.length) setSeason(allSeasons[allSeasons.length - 1]);
-  }, [matchIndex, allSeasons]);
+  useEffect(
+    function () {
+      if (!matchIndex.length || season) return;
+      if (allSeasons.length) setSeason(allSeasons[allSeasons.length - 1]);
+    },
+    [matchIndex, allSeasons],
+  );
 
   // Set default team when season changes
-  useEffect(function () {
-    if (!seasonTeams.length) return;
-    setSelectedTeam(seasonTeams.indexOf("Liverpool") >= 0 ? "Liverpool" : seasonTeams[0]);
-  }, [season, seasonTeams]);
+  useEffect(
+    function () {
+      if (!seasonTeams.length) return;
+      setSelectedTeam(
+        seasonTeams.indexOf("Liverpool") >= 0 ? "Liverpool" : seasonTeams[0],
+      );
+    },
+    [season, seasonTeams],
+  );
 
   // Set default match when team changes
-  useEffect(function () {
-    if (!teamMatches.length) return;
-    setMatchId("" + teamMatches[0].id);
-  }, [selectedTeam, teamMatches]);
+  useEffect(
+    function () {
+      if (!teamMatches.length) return;
+      setMatchId("" + teamMatches[0].id);
+    },
+    [selectedTeam, teamMatches],
+  );
 
   // Load SCA data when match and team are selected
-  useEffect(function () {
-    if (!matchId || !selectedTeam) return;
-    setLoading(true);
-    api("/match/" + matchId + "/sca?team=" + encodeURIComponent(selectedTeam)).then(setScaBoard);
-    api("/match/" + matchId + "/events").then(function (ev) {
-      var p = [];
-      ev.forEach(function (e) {
-        if (e.team === selectedTeam && e.player && p.indexOf(e.player) < 0)
-          p.push(e.player);
+  useEffect(
+    function () {
+      if (!matchId || !selectedTeam) return;
+      setLoading(true);
+      api(
+        "/match/" + matchId + "/sca?team=" + encodeURIComponent(selectedTeam),
+      ).then(setScaBoard);
+      api("/match/" + matchId + "/events").then(function (ev) {
+        var p = [];
+        ev.forEach(function (e) {
+          if (e.team === selectedTeam && e.player && p.indexOf(e.player) < 0)
+            p.push(e.player);
+        });
+        p.sort();
+        setPlayers(p);
+        setPlayer("All Players");
+        setLoading(false);
       });
-      p.sort();
-      setPlayers(p);
-      setPlayer("All Players");
-      setLoading(false);
-    });
-  }, [matchId, selectedTeam]);
+    },
+    [matchId, selectedTeam],
+  );
 
   // Load SCA events when player filter changes
-  useEffect(function () {
-    if (!matchId || !selectedTeam) return;
-    var pp = player !== "All Players" ? "&player=" + encodeURIComponent(player) : "";
-    api("/match/" + matchId + "/sca_events?team=" + encodeURIComponent(selectedTeam) + pp).then(setScaEvents);
-  }, [matchId, selectedTeam, player]);
+  useEffect(
+    function () {
+      if (!matchId || !selectedTeam) return;
+      var pp =
+        player !== "All Players" ? "&player=" + encodeURIComponent(player) : "";
+      api(
+        "/match/" +
+          matchId +
+          "/sca_events?team=" +
+          encodeURIComponent(selectedTeam) +
+          pp,
+      ).then(setScaEvents);
+    },
+    [matchId, selectedTeam, player],
+  );
 
   // Format match display with opponent and H/A indicator
   var formatMatch = function (m) {
@@ -1283,7 +1330,9 @@ function SCAPage() {
           <label>Season</label>
           <select
             value={season}
-            onChange={function (e) { setSeason(e.target.value); }}
+            onChange={function (e) {
+              setSeason(e.target.value);
+            }}
           >
             {allSeasons.map(function (s) {
               return (
@@ -1298,7 +1347,9 @@ function SCAPage() {
           <label>Team</label>
           <select
             value={selectedTeam}
-            onChange={function (e) { setSelectedTeam(e.target.value); }}
+            onChange={function (e) {
+              setSelectedTeam(e.target.value);
+            }}
           >
             {seasonTeams.map(function (t) {
               return (
@@ -1313,7 +1364,9 @@ function SCAPage() {
           <label>Match</label>
           <select
             value={matchId}
-            onChange={function (e) { setMatchId(e.target.value); }}
+            onChange={function (e) {
+              setMatchId(e.target.value);
+            }}
             style={{ minWidth: 200 }}
           >
             {teamMatches.map(function (m) {
@@ -1329,7 +1382,9 @@ function SCAPage() {
           <label>Highlight</label>
           <select
             value={player}
-            onChange={function (e) { setPlayer(e.target.value); }}
+            onChange={function (e) {
+              setPlayer(e.target.value);
+            }}
           >
             <option value="All Players">All Players</option>
             {players.map(function (p) {
@@ -3014,6 +3069,38 @@ function LandingPage({ onStart }) {
   var heroRef = useRef(null);
   var titleRef = useRef(null);
   var previewRefs = useRef([]);
+  var matchCountState = useState(null);
+  var matchCount = matchCountState[0];
+  var setMatchCount = matchCountState[1];
+  var seasonState = useState("2024/2025");
+  var latestSeason = seasonState[0];
+  var setLatestSeason = seasonState[1];
+
+  // Fetch match count and latest season
+  useEffect(function () {
+    api("/matches")
+      .then(function (ids) {
+        setMatchCount(ids.length);
+      })
+      .catch(function () {});
+    api("/match-index")
+      .then(function (idx) {
+        if (idx && idx.length) {
+          var seasons = idx
+            .map(function (m) {
+              return m.season;
+            })
+            .filter(function (v, i, a) {
+              return a.indexOf(v) === i;
+            })
+            .sort();
+          if (seasons.length) {
+            setLatestSeason(seasons[seasons.length - 1]);
+          }
+        }
+      })
+      .catch(function () {});
+  }, []);
 
   useEffect(function () {
     if (typeof gsap === "undefined") return;
@@ -3129,7 +3216,7 @@ function LandingPage({ onStart }) {
 
         <div className="hero-masthead">
           <span className="masthead-label">Premier League Analytics</span>
-          <span className="masthead-year">2024 — 25</span>
+          <span className="masthead-year">{latestSeason ? latestSeason.replace("/", " — ").slice(2) : "2024 — 25"}</span>
         </div>
 
         <div className="hero-content" ref={titleRef}>
@@ -3147,7 +3234,7 @@ function LandingPage({ onStart }) {
         </div>
 
         <div className="hero-corner-info">
-          <span className="corner-stat">340</span>
+          <span className="corner-stat">{matchCount != null ? matchCount : "—"}</span>
           <span className="corner-label">Matches Analyzed</span>
         </div>
 
@@ -3236,6 +3323,21 @@ function AverageTouchesPage() {
   var s6 = useState(false),
     loading = s6[0],
     setLoading = s6[1];
+  var s7 = useState(false),
+    showSubs = s7[0],
+    setShowSubs = s7[1];
+  var s8 = useState({}),
+    formationData = s8[0],
+    setFormationData = s8[1];
+  var s9 = useState(""),
+    teamASummary = s9[0],
+    setTeamASummary = s9[1];
+  var s10 = useState(""),
+    teamBSummary = s10[0],
+    setTeamBSummary = s10[1];
+  var s11 = useState(false),
+    summaryLoading = s11[0],
+    setSummaryLoading = s11[1];
 
   useEffect(function () {
     api("/match-index").then(function (idx) {
@@ -3244,63 +3346,109 @@ function AverageTouchesPage() {
   }, []);
 
   // Derive all seasons
-  var allSeasons = useMemo(function () {
-    return matchIndex
-      .map(function (m) { return m.season; })
-      .filter(function (v, i, a) { return a.indexOf(v) === i; })
-      .sort();
-  }, [matchIndex]);
+  var allSeasons = useMemo(
+    function () {
+      return matchIndex
+        .map(function (m) {
+          return m.season;
+        })
+        .filter(function (v, i, a) {
+          return a.indexOf(v) === i;
+        })
+        .sort();
+    },
+    [matchIndex],
+  );
 
   // Derive teams for selected season
-  var seasonTeams = useMemo(function () {
-    if (!season) return [];
-    var teamsSet = {};
-    matchIndex.forEach(function (m) {
-      if (m.season === season) {
-        if (m.home) teamsSet[m.home] = true;
-        if (m.away) teamsSet[m.away] = true;
-      }
-    });
-    return Object.keys(teamsSet).sort();
-  }, [matchIndex, season]);
+  var seasonTeams = useMemo(
+    function () {
+      if (!season) return [];
+      var teamsSet = {};
+      matchIndex.forEach(function (m) {
+        if (m.season === season) {
+          if (m.home) teamsSet[m.home] = true;
+          if (m.away) teamsSet[m.away] = true;
+        }
+      });
+      return Object.keys(teamsSet).sort();
+    },
+    [matchIndex, season],
+  );
 
   // Filter matches by season AND team
-  var teamMatches = useMemo(function () {
-    if (!season || !selectedTeam) return [];
-    return matchIndex.filter(function (m) {
-      return m.season === season && (m.home === selectedTeam || m.away === selectedTeam);
-    });
-  }, [matchIndex, season, selectedTeam]);
+  var teamMatches = useMemo(
+    function () {
+      if (!season || !selectedTeam) return [];
+      return matchIndex.filter(function (m) {
+        return (
+          m.season === season &&
+          (m.home === selectedTeam || m.away === selectedTeam)
+        );
+      });
+    },
+    [matchIndex, season, selectedTeam],
+  );
 
   // Set default season
-  useEffect(function () {
-    if (!matchIndex.length || season) return;
-    if (allSeasons.length) setSeason(allSeasons[allSeasons.length - 1]);
-  }, [matchIndex, allSeasons]);
+  useEffect(
+    function () {
+      if (!matchIndex.length || season) return;
+      if (allSeasons.length) setSeason(allSeasons[allSeasons.length - 1]);
+    },
+    [matchIndex, allSeasons],
+  );
 
   // Set default team
-  useEffect(function () {
-    if (!seasonTeams.length) return;
-    setSelectedTeam(seasonTeams.indexOf("Liverpool") >= 0 ? "Liverpool" : seasonTeams[0]);
-  }, [season, seasonTeams]);
+  useEffect(
+    function () {
+      if (!seasonTeams.length) return;
+      setSelectedTeam(
+        seasonTeams.indexOf("Liverpool") >= 0 ? "Liverpool" : seasonTeams[0],
+      );
+    },
+    [season, seasonTeams],
+  );
 
   // Set default match
-  useEffect(function () {
-    if (!teamMatches.length) return;
-    setMatchId("" + teamMatches[0].id);
-  }, [selectedTeam, teamMatches]);
+  useEffect(
+    function () {
+      if (!teamMatches.length) return;
+      setMatchId("" + teamMatches[0].id);
+    },
+    [selectedTeam, teamMatches],
+  );
 
-  // Load average touches data
-  useEffect(function () {
-    if (!matchId) return;
-    setLoading(true);
-    api("/match/" + matchId + "/average-touches")
-      .then(function (data) {
-        setAvgPositions(data);
-        setLoading(false);
-      })
-      .catch(function () { setLoading(false); });
-  }, [matchId]);
+  // Load average touches data (all players including subs) + formation connections
+  useEffect(
+    function () {
+      if (!matchId) return;
+      setLoading(true);
+
+      // Load both regular positions (all players) and formation data (connections)
+      Promise.all([
+        api("/match/" + matchId + "/average-touches"),
+        api("/match/" + matchId + "/formation-enhanced"),
+      ])
+        .then(function (results) {
+          var avgPositionsData = results[0];
+          var formationEnhancedData = results[1];
+
+          console.log("Loaded positions:", avgPositionsData.length, "players");
+          console.log("Starters:", avgPositionsData.filter(function (p) { return p.is_starter; }).length);
+          console.log("Subs:", avgPositionsData.filter(function (p) { return !p.is_starter; }).length);
+
+          setAvgPositions(avgPositionsData);
+          setFormationData(formationEnhancedData);
+          setLoading(false);
+        })
+        .catch(function (err) {
+          console.error("Error loading data:", err);
+          setLoading(false);
+        });
+    },
+    [matchId],
+  );
 
   // Format match display
   var formatMatch = function (m) {
@@ -3312,29 +3460,184 @@ function AverageTouchesPage() {
   };
 
   // Get teams from data
-  var teams = useMemo(function () {
-    if (!avgPositions.length) return [];
-    var teamsSet = {};
-    avgPositions.forEach(function (p) {
-      if (p.team) teamsSet[p.team] = true;
-    });
-    return Object.keys(teamsSet).sort();
-  }, [avgPositions]);
+  var teams = useMemo(
+    function () {
+      if (!avgPositions.length) return [];
+      var teamsSet = {};
+      avgPositions.forEach(function (p) {
+        if (p.team) teamsSet[p.team] = true;
+      });
+      var teamsList = Object.keys(teamsSet).sort();
+      console.log("Teams detected:", teamsList);
+      return teamsList;
+    },
+    [avgPositions],
+  );
 
-  var teamAData = avgPositions.filter(function (p) { return p.team === teams[0]; });
-  var teamBData = avgPositions.filter(function (p) { return p.team === teams[1]; });
-  var maxTouches = Math.max(1, Math.max.apply(null, avgPositions.map(function (p) { return p.touches_count || 0; })));
+  // Load AI summaries when teams are detected
+  useEffect(
+    function () {
+      if (!teams.length || !matchId) return;
+      setSummaryLoading(true);
+
+      Promise.all([
+        api("/match/" + matchId + "/ai-summary?team=" + teams[0]).catch(
+          function () {
+            return null;
+          }
+        ),
+        api("/match/" + matchId + "/ai-summary?team=" + teams[1]).catch(
+          function () {
+            return null;
+          }
+        ),
+      ])
+        .then(function (results) {
+          if (results[0] && results[0].summary) {
+            setTeamASummary(results[0].summary);
+          }
+          if (results[1] && results[1].summary) {
+            setTeamBSummary(results[1].summary);
+          }
+          setSummaryLoading(false);
+        })
+        .catch(function () {
+          setSummaryLoading(false);
+        });
+    },
+    [teams, matchId],
+  );
+
+  // Filter data based on showSubs toggle
+  var filteredPositions = useMemo(
+    function () {
+      var result;
+      if (showSubs) {
+        result = avgPositions;
+        console.log("Toggle ON (All Players):", result.length);
+      } else {
+        result = avgPositions.filter(function (p) {
+          return p.is_starter;
+        });
+        console.log("Toggle OFF (Starters only):", result.length);
+      }
+      return result;
+    },
+    [avgPositions, showSubs],
+  );
+
+  var teamAData = filteredPositions.filter(function (p) {
+    return p.team === teams[0];
+  });
+  var teamBData = filteredPositions.filter(function (p) {
+    return p.team === teams[1];
+  });
+
+  // Debug: Log render state
+  console.log("RENDER STATE:", {
+    loading,
+    avgPositionsLength: avgPositions.length,
+    teamsLength: teams.length,
+    filteredLength: filteredPositions.length,
+    teamAData: teamAData.length,
+    teamBData: teamBData.length,
+    showSubs,
+    subsCount,
+    shouldRender: avgPositions.length > 0 && teams.length === 2,
+  });
+  var maxTouches = Math.max(
+    1,
+    Math.max.apply(
+      null,
+      filteredPositions.map(function (p) {
+        return p.touches_count || 0;
+      }),
+    ),
+  );
+
+  // Count subs
+  var subsCount = avgPositions.filter(function (p) {
+    return !p.is_starter;
+  }).length;
+
+  // Formation detection function
+  function detectFormation(players) {
+    if (players.length < 10) return "—";
+    // Sort by x position (excluding goalkeeper - player with lowest x)
+    var sorted = players.slice().sort(function (a, b) {
+      return a.avg_x - b.avg_x;
+    });
+    var outfield = sorted.slice(1); // Remove goalkeeper
+    if (outfield.length < 9) return "—";
+
+    // Cluster players into lines based on x position gaps
+    var lines = [];
+    var currentLine = [outfield[0]];
+    var threshold = 8; // x distance threshold - smaller for cleaner lines
+
+    for (var i = 1; i < outfield.length; i++) {
+      var lastX = currentLine[currentLine.length - 1].avg_x;
+      if (outfield[i].avg_x - lastX < threshold) {
+        currentLine.push(outfield[i]);
+      } else {
+        lines.push(currentLine.length);
+        currentLine = [outfield[i]];
+      }
+    }
+    lines.push(currentLine.length);
+
+    // Simplify to standard formation (combine small groups)
+    if (lines.length > 4) {
+      // Too many lines - merge adjacent small ones
+      var simplified = [];
+      var i = 0;
+      while (i < lines.length) {
+        if (lines[i] === 1 && i + 1 < lines.length) {
+          simplified.push(lines[i] + lines[i + 1]);
+          i += 2;
+        } else {
+          simplified.push(lines[i]);
+          i++;
+        }
+      }
+      lines = simplified;
+    }
+
+    var formationStr = lines.join("-");
+    return formationStr;
+  }
+
+  var teamAFormation = useMemo(
+    function () {
+      return detectFormation(teamAData);
+    },
+    [teamAData],
+  );
+  var teamBFormation = useMemo(
+    function () {
+      return detectFormation(teamBData);
+    },
+    [teamBData],
+  );
 
   return (
     <div>
       <div className="page-header">
         <h2>Average Touches</h2>
-        <p>Standardized player positioning with both teams attacking left to right.</p>
+        <p>
+          Standardized player positioning with both teams attacking left to
+          right.
+        </p>
       </div>
       <div className="controls-row">
         <div className="control-group">
           <label>Season</label>
-          <select value={season} onChange={function (e) { setSeason(e.target.value); }}>
+          <select
+            value={season}
+            onChange={function (e) {
+              setSeason(e.target.value);
+            }}
+          >
             {allSeasons.map(function (s) {
               return (
                 <option key={s} value={s}>
@@ -3346,7 +3649,12 @@ function AverageTouchesPage() {
         </div>
         <div className="control-group">
           <label>Team</label>
-          <select value={selectedTeam} onChange={function (e) { setSelectedTeam(e.target.value); }}>
+          <select
+            value={selectedTeam}
+            onChange={function (e) {
+              setSelectedTeam(e.target.value);
+            }}
+          >
             {seasonTeams.map(function (t) {
               return (
                 <option key={t} value={t}>
@@ -3358,7 +3666,13 @@ function AverageTouchesPage() {
         </div>
         <div className="control-group">
           <label>Match</label>
-          <select value={matchId} onChange={function (e) { setMatchId(e.target.value); }} style={{ minWidth: 200 }}>
+          <select
+            value={matchId}
+            onChange={function (e) {
+              setMatchId(e.target.value);
+            }}
+            style={{ minWidth: 200 }}
+          >
             {teamMatches.map(function (m) {
               return (
                 <option key={m.id} value={"" + m.id}>
@@ -3368,102 +3682,351 @@ function AverageTouchesPage() {
             })}
           </select>
         </div>
+        <div className="control-group">
+          <label>Players</label>
+          <button
+            className={"toggle-btn" + (showSubs ? " active" : "")}
+            onClick={function () {
+              console.log("Toggle clicked! showSubs was:", showSubs, "now:", !showSubs);
+              setShowSubs(!showSubs);
+            }}
+          >
+            {showSubs ? "All Players" : "Starting XI"}
+            {subsCount > 0 && !showSubs
+              ? " (" + subsCount + " subs hidden)"
+              : ""}
+          </button>
+        </div>
       </div>
       {loading ? (
         <Loading />
       ) : avgPositions.length > 0 && teams.length === 2 ? (
-        <div>
-          <div className="avg-touch-legend">
-            <div className="legend-item">
-              <span className="legend-dot" style={{ background: "#C8102E" }}></span>
-              <span className="legend-label">{teams[0]} (Attacking →)</span>
+        <div className="avg-touches-container">
+          {/* AI Summary Section */}
+          {(teamASummary || teamBSummary) && (
+            <div className="ai-summary-section">
+              <h3>📊 Tactical Analysis</h3>
+              <div className="summary-grid">
+                {teamASummary && (
+                  <div className="summary-card team-a">
+                    <h4>{teams[0]}</h4>
+                    <p>{teamASummary}</p>
+                  </div>
+                )}
+                {teamBSummary && (
+                  <div className="summary-card team-b">
+                    <h4>{teams[1]}</h4>
+                    <p>{teamBSummary}</p>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="legend-item">
-              <span className="legend-dot" style={{ background: "#B8860B" }}></span>
-              <span className="legend-label">← Attacking) {teams[1]}</span>
+          )}
+          {summaryLoading && !teamASummary && !teamBSummary && (
+            <div className="ai-summary-loading">
+              <p>🤖 Generating tactical analysis...</p>
             </div>
-            <div className="legend-note">Bubble size = touch count</div>
+          )}
+          <div className="avg-touches-grid">
+            {/* Team A Panel */}
+            <div className="avg-touch-panel">
+              <div
+                className="avg-touch-panel-header"
+                style={{ borderLeftColor: "#C8102E" }}
+              >
+                <h3>{teams[0]}</h3>
+                <span className="attack-direction">Attacking →</span>
+              </div>
+              <svg viewBox="0 0 52 68" className="half-pitch-svg">
+                {/* Half pitch background */}
+                <rect x="0" y="0" width="52" height="68" fill="#1a472a" />
+                {/* Pitch markings */}
+                <rect
+                  x="2"
+                  y="2"
+                  width="50"
+                  height="64"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Penalty area */}
+                <rect
+                  x="2"
+                  y="13"
+                  width="16.5"
+                  height="42"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* 6-yard box */}
+                <rect
+                  x="2"
+                  y="24"
+                  width="5.5"
+                  height="20"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Goal */}
+                <rect
+                  x="0"
+                  y="28"
+                  width="2"
+                  height="12"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Penalty spot */}
+                <circle cx="13" cy="34" r="0.4" fill="#fff" fillOpacity="0.6" />
+                {/* Center circle arc */}
+                <path
+                  d="M 52 24 A 10 10 0 0 0 52 44"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Connections (from formation data) */}
+                {formationData[teams[0]] && formationData[teams[0]].connections
+                  ? formationData[teams[0]].connections.map(
+                      function (conn, idx) {
+                        var x1 = (conn.from.x / 100) * 50 + 2;
+                        var y1 = (conn.from.y / 100) * 64 + 2;
+                        var x2 = (conn.to.x / 100) * 50 + 2;
+                        var y2 = (conn.to.y / 100) * 64 + 2;
+                        return (
+                          <line
+                            key={"conn-" + idx}
+                            x1={x1}
+                            y1={y1}
+                            x2={x2}
+                            y2={y2}
+                            stroke="#C8102E"
+                            strokeWidth={
+                              conn.type === "line_connection" ? "0.15" : "0.08"
+                            }
+                            strokeOpacity={
+                              conn.type === "line_connection" ? 0.2 : 0.12
+                            }
+                            strokeDasharray={
+                              conn.type === "line_connection"
+                                ? "0.5,0.3"
+                                : "none"
+                            }
+                          />
+                        );
+                      },
+                    )
+                  : null}
+                {/* Players */}
+                {teamAData.map(function (p, i) {
+                  var x = (p.avg_x / 100) * 50 + 2;
+                  var y = (p.avg_y / 100) * 64 + 2;
+                  var radius =
+                    Math.sqrt((p.touches_count / maxTouches) * 3) + 1;
+                  var playerName = (p.player || "?").split(" ")[0].substring(0, 3);
+                  return (
+                    <g key={i}>
+                      {/* Glow effect */}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={radius + 0.5}
+                        fill="#C8102E"
+                        fillOpacity="0.15"
+                        zIndex="3"
+                      />
+                      {/* Main circle */}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={radius}
+                        fill="#C8102E"
+                        fillOpacity="0.95"
+                        stroke="#fff"
+                        strokeWidth="0.25"
+                        zIndex="4"
+                      />
+                      {/* Player initial */}
+                      <text
+                        x={x}
+                        y={y + radius / 3}
+                        fill="#fff"
+                        fontSize="1.2"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fontFamily="monospace"
+                        zIndex="5"
+                      >
+                        {playerName}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+              <div className="avg-touch-formation">
+                <span className="formation-label">Avg. Shape</span>
+                <span className="formation-value">{teamAFormation}</span>
+              </div>
+            </div>
+            {/* Team B Panel */}
+            <div className="avg-touch-panel">
+              <div
+                className="avg-touch-panel-header"
+                style={{ borderLeftColor: "#B8860B" }}
+              >
+                <h3>{teams[1]}</h3>
+                <span className="attack-direction">← Attacking</span>
+              </div>
+              <svg viewBox="0 0 52 68" className="half-pitch-svg">
+                {/* Half pitch background */}
+                <rect x="0" y="0" width="52" height="68" fill="#1a472a" />
+                {/* Pitch markings - mirrored */}
+                <rect
+                  x="0"
+                  y="2"
+                  width="50"
+                  height="64"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Penalty area */}
+                <rect
+                  x="33.5"
+                  y="13"
+                  width="16.5"
+                  height="42"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* 6-yard box */}
+                <rect
+                  x="44.5"
+                  y="24"
+                  width="5.5"
+                  height="20"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Goal */}
+                <rect
+                  x="50"
+                  y="28"
+                  width="2"
+                  height="12"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Penalty spot */}
+                <circle cx="39" cy="34" r="0.4" fill="#fff" fillOpacity="0.6" />
+                {/* Center circle arc */}
+                <path
+                  d="M 0 24 A 10 10 0 0 1 0 44"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="0.3"
+                  strokeOpacity="0.6"
+                />
+                {/* Connections (from formation data) */}
+                {formationData[teams[1]] && formationData[teams[1]].connections
+                  ? formationData[teams[1]].connections.map(
+                      function (conn, idx) {
+                        var x1 = 50 - (conn.from.x / 100) * 50;
+                        var y1 = (conn.from.y / 100) * 64 + 2;
+                        var x2 = 50 - (conn.to.x / 100) * 50;
+                        var y2 = (conn.to.y / 100) * 64 + 2;
+                        return (
+                          <line
+                            key={"conn-" + idx}
+                            x1={x1}
+                            y1={y1}
+                            x2={x2}
+                            y2={y2}
+                            stroke="#B8860B"
+                            strokeWidth={
+                              conn.type === "line_connection" ? "0.15" : "0.08"
+                            }
+                            strokeOpacity={
+                              conn.type === "line_connection" ? 0.2 : 0.12
+                            }
+                            strokeDasharray={
+                              conn.type === "line_connection"
+                                ? "0.5,0.3"
+                                : "none"
+                            }
+                          />
+                        );
+                      },
+                    )
+                  : null}
+                {/* Players - flip x coordinate */}
+                {teamBData.map(function (p, i) {
+                  var x = 50 - (p.avg_x / 100) * 50;
+                  var y = (p.avg_y / 100) * 64 + 2;
+                  var radius =
+                    Math.sqrt((p.touches_count / maxTouches) * 3) + 1;
+                  var playerName = (p.player || "?").split(" ")[0].substring(0, 3);
+                  return (
+                    <g key={i}>
+                      {/* Glow effect */}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={radius + 0.5}
+                        fill="#B8860B"
+                        fillOpacity="0.15"
+                        zIndex="3"
+                      />
+                      {/* Main circle */}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={radius}
+                        fill="#B8860B"
+                        fillOpacity="0.95"
+                        stroke="#fff"
+                        strokeWidth="0.25"
+                        zIndex="4"
+                      />
+                      {/* Player initial */}
+                      <text
+                        x={x}
+                        y={y + radius / 3}
+                        fill="#fff"
+                        fontSize="1.2"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        fontFamily="monospace"
+                        zIndex="5"
+                      >
+                        {playerName}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+              <div className="avg-touch-formation">
+                <span className="formation-label">Avg. Shape</span>
+                <span className="formation-value">{teamBFormation}</span>
+              </div>
+            </div>
           </div>
-          <PitchSVG>
-            {teamAData.map(function (p, i) {
-              var radius = Math.sqrt((p.touches_count / maxTouches) * 300) + 4;
-              var lastName = (p.player || "").split(" ").pop();
-              return (
-                <g key={i}>
-                  <circle
-                    cx={p.avg_x}
-                    cy={Y(p.avg_y)}
-                    r={radius}
-                    fill="#C8102E"
-                    fillOpacity="0.75"
-                    stroke="#FFFFFF"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x={p.avg_x}
-                    y={Y(p.avg_y) + radius + 4}
-                    fill="#1f1f1f"
-                    fontSize="3.5"
-                    fontWeight="600"
-                    textAnchor="middle"
-                    fontFamily="var(--font)"
-                  >
-                    {lastName}
-                  </text>
-                  <text
-                    x={p.avg_x}
-                    y={Y(p.avg_y) + 1}
-                    fill="#FFFFFF"
-                    fontSize="3"
-                    fontWeight="700"
-                    textAnchor="middle"
-                    fontFamily="var(--font-mono)"
-                  >
-                    {p.touches_count}
-                  </text>
-                </g>
-              );
-            })}
-            {teamBData.map(function (p, i) {
-              var radius = Math.sqrt((p.touches_count / maxTouches) * 300) + 4;
-              var lastName = (p.player || "").split(" ").pop();
-              return (
-                <g key={i + 100}>
-                  <circle
-                    cx={p.avg_x}
-                    cy={Y(p.avg_y)}
-                    r={radius}
-                    fill="#B8860B"
-                    fillOpacity="0.75"
-                    stroke="#FFFFFF"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x={p.avg_x}
-                    y={Y(p.avg_y) + radius + 4}
-                    fill="#1f1f1f"
-                    fontSize="3.5"
-                    fontWeight="600"
-                    textAnchor="middle"
-                    fontFamily="var(--font)"
-                  >
-                    {lastName}
-                  </text>
-                  <text
-                    x={p.avg_x}
-                    y={Y(p.avg_y) + 1}
-                    fill="#FFFFFF"
-                    fontSize="3"
-                    fontWeight="700"
-                    textAnchor="middle"
-                    fontFamily="var(--font-mono)"
-                  >
-                    {p.touches_count}
-                  </text>
-                </g>
-              );
-            })}
-          </PitchSVG>
         </div>
       ) : (
         <EmptyState message="No touch data available for this match." />
