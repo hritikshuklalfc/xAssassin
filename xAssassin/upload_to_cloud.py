@@ -1,12 +1,15 @@
 import os
 import pandas as pd
 from supabase import create_client, Client
+from dotenv import load_dotenv
 
-SUPERBASE_URL="https://iktrobshaarinqhzuirb.supabase.co"
-SUPERBASE_KEY="sb_publishable_7yvklXukzWCGMhIG6zgOqQ_2-0s_F0r"
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 print("connecting to superbase cloud vault...")
-supabase: Client = create_client(SUPERBASE_URL, SUPERBASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 data_dir="data/raw_event"
 csv_files=[f for f in os.listdir(data_dir) if f.endswith(".csv")]
