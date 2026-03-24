@@ -20,14 +20,14 @@ A comprehensive football analytics platform for visualizing and analyzing Premie
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18 (CDN), Babel Standalone, GSAP |
-| Backend | Flask (Python) |
-| Dashboard | Streamlit |
-| Database | Supabase |
-| AI | Google Gemini API |
-| Styling | Custom CSS (Editorial Theme) |
+| Layer     | Technology                             |
+| --------- | -------------------------------------- |
+| Frontend  | React 18 (CDN), Babel Standalone, GSAP |
+| Backend   | Flask (Python)                         |
+| Dashboard | Streamlit                              |
+| Database  | Supabase                               |
+| AI        | Google Gemini API                      |
+| Styling   | Custom CSS (Editorial Theme)           |
 
 ---
 
@@ -166,12 +166,14 @@ SUPABASE_KEY=your_supabase_key_here
 ### 5. Run the Application
 
 **React Frontend (Flask):**
+
 ```bash
 python web/server.py
 # Open http://localhost:5050
 ```
 
 **Streamlit Dashboard:**
+
 ```bash
 streamlit run dashboard/app.py
 # Open http://localhost:8501
@@ -181,20 +183,20 @@ streamlit run dashboard/app.py
 
 ## API Endpoints
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/matches` | List all match IDs |
-| `GET /api/match-index` | Get match metadata (season, teams, date) |
-| `GET /api/teams` | List all teams |
-| `GET /api/match/<id>/events` | Get all events for a match |
-| `GET /api/match/<id>/passes` | Get passes for a match |
-| `GET /api/match/<id>/shots` | Get shots for a match |
-| `GET /api/match/<id>/sca` | Get shot-creating actions |
-| `GET /api/match/<id>/xt` | Get expected threat data |
-| `GET /api/match/<id>/average-positions` | Get player average positions |
-| `GET /api/match/<id>/formation` | Get detected formation |
-| `GET /api/match/<id>/ai-summary` | Get AI-generated match summary |
-| `GET /api/team/<name>/passes` | Get all passes for a team |
+| Endpoint                                | Description                              |
+| --------------------------------------- | ---------------------------------------- |
+| `GET /api/matches`                      | List all match IDs                       |
+| `GET /api/match-index`                  | Get match metadata (season, teams, date) |
+| `GET /api/teams`                        | List all teams                           |
+| `GET /api/match/<id>/events`            | Get all events for a match               |
+| `GET /api/match/<id>/passes`            | Get passes for a match                   |
+| `GET /api/match/<id>/shots`             | Get shots for a match                    |
+| `GET /api/match/<id>/sca`               | Get shot-creating actions                |
+| `GET /api/match/<id>/xt`                | Get expected threat data                 |
+| `GET /api/match/<id>/average-positions` | Get player average positions             |
+| `GET /api/match/<id>/formation`         | Get detected formation                   |
+| `GET /api/match/<id>/ai-summary`        | Get AI-generated match summary           |
+| `GET /api/team/<name>/passes`           | Get all passes for a team                |
 
 ---
 
@@ -203,6 +205,7 @@ streamlit run dashboard/app.py
 ### TacticalEngine (`xAssassin/metrices.py`)
 
 Core analytics engine that calculates:
+
 - **Expected Threat (xT)** - Ball progression value based on pitch zones
 - **Shot-Creating Actions (SCA)** - Two actions preceding each shot
 - **Pass Networks** - Aggregated passing connections
@@ -210,38 +213,40 @@ Core analytics engine that calculates:
 ### Formation Analyzer (`xAssassin/formation_analyzer.py`)
 
 AI-powered formation detection using:
+
 - K-means clustering for player positioning
 - Template matching against known formations
 - Gemini AI for tactical analysis summaries
 
 ### React Components
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
+| Component       | Location             | Purpose                              |
+| --------------- | -------------------- | ------------------------------------ |
 | `DataFieldHero` | `components/canvas/` | Animated pitch with drifting players |
-| `PitchSVG` | `components/canvas/` | Reusable SVG pitch container |
-| `PassArrows` | `components/canvas/` | Pass visualization with arrows |
-| `RadarChart` | `components/canvas/` | Team comparison spider charts |
-| `SiteHeader` | `components/layout/` | Sticky header with navigation |
-| `NavOverlay` | `components/layout/` | Full-screen navigation menu |
+| `PitchSVG`      | `components/canvas/` | Reusable SVG pitch container         |
+| `PassArrows`    | `components/canvas/` | Pass visualization with arrows       |
+| `RadarChart`    | `components/canvas/` | Team comparison spider charts        |
+| `SiteHeader`    | `components/layout/` | Sticky header with navigation        |
+| `NavOverlay`    | `components/layout/` | Full-screen navigation menu          |
 
 ---
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
+| Variable         | Description                            | Required              |
+| ---------------- | -------------------------------------- | --------------------- |
 | `GEMINI_API_KEY` | Google Gemini API key for AI summaries | Yes (for AI features) |
-| `SUPABASE_URL` | Supabase project URL | Yes (for cloud data) |
-| `SUPABASE_KEY` | Supabase anon/public key | Yes (for cloud data) |
-| `FLASK_PORT` | Flask server port (default: 5050) | No |
-| `FLASK_DEBUG` | Enable debug mode | No |
+| `SUPABASE_URL`   | Supabase project URL                   | Yes (for cloud data)  |
+| `SUPABASE_KEY`   | Supabase anon/public key               | Yes (for cloud data)  |
+| `FLASK_PORT`     | Flask server port (default: 5050)      | No                    |
+| `FLASK_DEBUG`    | Enable debug mode                      | No                    |
 
 ---
 
 ## Data Sources
 
 Match data is sourced from WhoScored and stored locally in JSON format:
+
 - `data/matches/` - Raw match event data
 - `data/processed/` - Computed metrics (xT, SCA)
 
@@ -250,12 +255,15 @@ Match data is sourced from WhoScored and stored locally in JSON format:
 ## Screenshots
 
 ### Landing Page
+
 Editorial-style landing with animated pitch visualization and tool previews.
 
 ### Pass Maps
+
 Interactive pass network visualization with player filtering.
 
 ### Formation Analysis
+
 AI-detected formations with tactical summaries.
 
 ---
