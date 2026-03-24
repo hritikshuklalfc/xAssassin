@@ -2,12 +2,16 @@
 Shared configuration for the xAssassin Dashboard.
 All colors, styles, and database config live here to keep pages consistent.
 """
+import os
 import streamlit as st
 from supabase import create_client
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- DATABASE ---
-SUPABASE_URL = "https://iktrobshaarinqhzuirb.supabase.co"
-SUPABASE_KEY = "sb_publishable_7yvklXukzWCGMhIG6zgOqQ_2-0s_F0r"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # --- COLOUR PALETTE (neo-noir) ---
 PITCH_BG = "#1e1e1e"
