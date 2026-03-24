@@ -910,6 +910,31 @@ body::after {
   color: var(--text-body);
 }
 
+.toggle-btn {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  color: var(--text-body);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.toggle-btn:hover {
+  border-color: var(--accent-crimson);
+  color: var(--accent-crimson);
+}
+
+.toggle-btn.active {
+  background: var(--accent-crimson);
+  border-color: var(--accent-crimson);
+  color: #fff;
+}
+
 .btn {
   padding: 10px 24px;
   border: 1px solid var(--border);
@@ -1114,45 +1139,195 @@ body::after {
    AVERAGE TOUCHES
    ============================================ */
 
-.avg-touch-legend {
+.avg-touches-container {
+  padding: 0;
+}
+
+.avg-touches-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.avg-touch-panel {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.avg-touch-panel-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 32px;
-  margin-bottom: 24px;
-  padding: 16px;
+  justify-content: space-between;
+  padding: 16px 20px;
   background: var(--bg-cream-alt);
+  border-left: 4px solid;
+}
+
+.avg-touch-panel-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-headline);
+  margin: 0;
+}
+
+.attack-direction {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.half-pitch-svg {
+  width: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+.avg-touch-formation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg-cream);
+  border-top: 1px solid var(--border);
+}
+
+.formation-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.formation-value {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-headline);
+  letter-spacing: 0.02em;
+}
+
+.avg-touch-stats {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.avg-touch-stats-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.touch-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.touch-stat-row:last-child {
+  border-bottom: none;
+}
+
+.touch-stat-name {
+  font-family: var(--font);
+  font-size: 0.85rem;
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+.touch-stat-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-headline);
+  font-weight: 700;
+  background: var(--bg-cream-alt);
+  padding: 2px 8px;
   border-radius: var(--radius-sm);
 }
 
-.legend-item {
+/* AI Summary Section */
+.ai-summary-section {
+  margin-bottom: 30px;
+  padding: 0;
+}
+
+.ai-summary-section h3 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-headline);
+  margin: 0 0 20px 0;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.legend-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid #fff;
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.legend-label {
+.summary-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  border-left: 4px solid;
+}
+
+.summary-card.team-a {
+  border-left-color: var(--accent-crimson);
+}
+
+.summary-card.team-b {
+  border-left-color: var(--accent-gold);
+}
+
+.summary-card h4 {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-headline);
+  margin: 0 0 12px 0;
+}
+
+.summary-card p {
   font-family: var(--font);
   font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--text-body);
-  font-weight: 600;
+  margin: 0;
 }
 
-.legend-note {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+.ai-summary-loading {
+  text-align: center;
+  padding: 20px;
+  background: var(--bg-cream);
+  border-radius: var(--radius);
   color: var(--text-secondary);
-  letter-spacing: 0.02em;
-  margin-left: 16px;
-  padding-left: 16px;
-  border-left: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .avg-touches-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ============================================
