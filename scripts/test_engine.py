@@ -1,10 +1,14 @@
+import os
 import pandas as pd
 from supabase import create_client, Client
+from dotenv import load_dotenv
 from xAssassin.metrices import TacticalEngine
 
-SUPERBASE_URL="https://iktrobshaarinqhzuirb.supabase.co"
-SUPERBASE_KEY="sb_publishable_7yvklXukzWCGMhIG6zgOqQ_2-0s_F0r"
-supabase: Client=create_client(SUPERBASE_URL, SUPERBASE_KEY)
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 game_id=1821050
 
